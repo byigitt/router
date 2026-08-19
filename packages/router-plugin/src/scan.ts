@@ -239,6 +239,28 @@ function relativeId(key: string, parentId: string) {
   return key
 }
 
+/**
+ * Same as `relativeId` but for escape-marked ids. Only one side may spell a
+ * segment with brackets (`[index].tsx` parenting `index.detail.tsx`), so the
+ * segments are compared without markers and sliced off the marked child.
+ */
+function relativeEscapedId(escapedKey: string, escapedParentId: string) {
+  if (escapedParentId === '__root__') return escapedKey
+  const parent =
+    escapedParentId.endsWith('/') && escapedParentId !== '/'
+      ? escapedParentId.slice(0, -1)
+      : escapedParentId
+  const parentSegments = parent.split('/')
+  const childSegments = escapedKey.split('/')
+  if (childSegments.length <= parentSegments.length) return escapedKey
+  for (let i = 0; i < parentSegments.length; i++) {
+    if (stripEscapeMarkers(parentSegments[i]!) !== stripEscapeMarkers(childSegments[i]!)) {
+      return escapedKey
+    }
+  }
+  return `/${childSegments.slice(parentSegments.length).join('/')}`
+}
+
 export function scanRoutes(options: ScanRoutesOptions): Array<ScannedRoute> {
   const rootDir = options.routesDirectory
   const files = listRouteFiles(
@@ -304,8 +326,8 @@ export function scanRoutes(options: ScanRoutesOptions): Array<ScannedRoute> {
       continue
     }
     const parentId = parentKeyOf(route.key, keys)
-    // Both sides keep their markers so the escaped tail survives the slice.
-    const escapedId = relativeId(escapedKey, escapedKeys.get(parentId) ?? '__root__')
+    // The child keeps its markers so the escaped tail survives the slice.
+    const escapedId = relativeEscapedId(escapedKey, escapedKeys.get(parentId) ?? '__root__')
     const slot = slotNameOf(escapedKey)
     routes.push({
       ...route,

@@ -91,6 +91,33 @@ describe('scanRoutes', () => {
     })
   })
 
+  it('does not repeat parent segments when only the parent spells the escape', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'speedy-router-escaped-parent-prefix-'))
+    write(dir, '__root.tsx')
+    write(dir, '[index].tsx')
+    write(dir, 'index.detail.tsx')
+    write(dir, '[route].tsx')
+    write(dir, 'route.settings.tsx')
+
+    const routes = scanRoutes({ routesDirectory: dir })
+    const byFileId = Object.fromEntries(routes.map((route) => [route.fileId, route]))
+
+    expect(byFileId['index.detail']).toMatchObject({
+      key: '/index/detail',
+      parentId: '/index',
+      id: '/detail',
+      path: '/detail',
+      fullPath: '/index/detail',
+    })
+    expect(byFileId['route.settings']).toMatchObject({
+      key: '/route/settings',
+      parentId: '/route',
+      id: '/settings',
+      path: '/settings',
+      fullPath: '/route/settings',
+    })
+  })
+
   it('does not treat an escaped @ file as a parallel-route slot', () => {
     const dir = mkdtempSync(join(tmpdir(), 'speedy-router-escaped-slot-'))
     write(dir, '__root.tsx')
