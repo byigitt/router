@@ -342,6 +342,11 @@ export function deepEqual(
     return true
   }
 
+  // NaN must equal NaN for loaderDeps / match reuse (Object.is, not ===).
+  if (typeof a === 'number' && typeof b === 'number' && Object.is(a, b)) {
+    return true
+  }
+
   if (typeof a !== typeof b) {
     return false
   }
