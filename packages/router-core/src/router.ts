@@ -1640,6 +1640,11 @@ export class RouterCore<
       searchStr = parsed.search
       hash = stripLeadingHash(parsed.hash)
       pathname = parsed.pathname
+      const href0 = href.charCodeAt(0)
+      if (!pathname && this.latestLocation && (href0 === 63 || href0 === 35)) {
+        pathname = this.latestLocation.pathname
+        if (href0 === 35) searchStr = this.latestLocation.searchStr
+      }
       hrefFull = `${pathname}${searchStr}${hash ? `#${hash}` : ''}`
     }
     const location: ParsedLocation = {
