@@ -144,8 +144,9 @@ export function resolvePath({ base, to, trailingSlash = 'never', cache }: Resolv
   ) {
     return lastResolveResult
   }
-  const isBase = to === '.'
-  const isAbsolute = to.charCodeAt(0) === 47
+  // Empty relative path resolves to the base (URL standard: new URL('', base)).
+  const isBase = to === '.' || to === ''
+  const isAbsolute = to.length !== 0 && to.charCodeAt(0) === 47
 
   let key: string | undefined
   key = isAbsolute ? to : isBase ? base : base + '\0' + to
