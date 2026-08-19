@@ -99,12 +99,9 @@ export function stripSearchParams<
 >(input: NoInfer<TInput>): SearchMiddleware<TSearchSchema> {
   return (({ search, next, meta }: SearchMiddlewareContext<TSearchSchema>) => {
     if (input === true) {
-      Object.keys(search as object).forEach((key) => {
-        if (meta) {
-          ;(meta.removedAny ||= new Set()).add(key)
-        }
-      })
-      return {}
+      // Clear inherited search by continuing the chain with an empty bag so
+      // dest updaters and downstream middlewares still run.
+      return next({} as TSearchSchema)
     }
     const nextResult = next(search)
     const result = { ...nextResult } as Record<string, unknown>
