@@ -209,18 +209,16 @@ class MemoryHistory implements RouterHistory {
   }
 
   back() {
-    if (this.index !== 0) {
-      this.index -= 1
-      this.location = locationFromPath(this.entries[this.index]!, this.states[this.index])
-    }
+    if (this.index === 0) return
+    this.index -= 1
+    this.location = locationFromPath(this.entries[this.index]!, this.states[this.index])
     this.notify(BACK_ACTION)
   }
 
   forward() {
-    if (this.index < this.entries.length - 1) {
-      this.index += 1
-      this.location = locationFromPath(this.entries[this.index]!, this.states[this.index])
-    }
+    if (this.index >= this.entries.length - 1) return
+    this.index += 1
+    this.location = locationFromPath(this.entries[this.index]!, this.states[this.index])
     this.notify(FORWARD_ACTION)
   }
 
